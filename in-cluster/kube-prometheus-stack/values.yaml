@@ -145,7 +145,7 @@ kps:
  
   alertmanager:
     alertmanagerSpec:
-      replicas: 0
+      replicas: 1
       logFormat: json
       storage:
         volumeClaimTemplate:
