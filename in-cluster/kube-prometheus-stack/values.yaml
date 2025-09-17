@@ -138,7 +138,7 @@ kps:
                     unit: "core"
     prometheusScrape: false
     fullnameOverride: kps-kube-state-metrics
-    nameOverride: kps-kube-state-metrics_path
+    nameOverride: kps-kube-state-metrics-path
 
   grafana:
     enabled: true
@@ -154,7 +154,7 @@ kps:
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
-                storage: 10Gi
+                storage: 1Gi
 
   prometheus:
     prometheusSpec:
@@ -165,5 +165,5 @@ kps:
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
-                storage: 50Gi
+                storage: 1Gi
 
