@@ -145,7 +145,7 @@ kps:
  
   alertmanager:
     alertmanagerSpec:
-      replicas: 0
+      replicas: 1
       logFormat: json
       storage:
         volumeClaimTemplate:
@@ -158,7 +158,7 @@ kps:
 
   prometheus:
     prometheusSpec:
-      replicas: 0
+      replicas: 1
       storageSpec:
         volumeClaimTemplate:
           spec:
