@@ -1,0 +1,14 @@
+# schema/type of the Helm chart
+apiVersion: v2
+name: metrics-server-slim
+description: Slim chart that pulls metrics-server as a dependency
+type: application
+# This is the version of your wrapper chart or the Helm chart in your repo (for the slim chart). This version is what Helm (and ArgoCD) will see as “the chart version” you are deploying. You bump this when you change your wrapper chart’s defaults, dependencies, etc
+version: 0.1.0
+appVersion: "0.7.2" # (example: use metrics-server upstream app version)
+
+dependencies:
+  - name: metrics-server
+    version: "3.12.2" # check latest version with `helm search repo metrics-server`
+    repository: "https://kubernetes-sigs.github.io/metrics-server/"
+    alias: ms
