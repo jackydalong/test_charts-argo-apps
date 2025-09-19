@@ -33,8 +33,10 @@ goldilocks:
   vpa:
     # Enables installation of VPA components (Recommender, optionally Updater, AdmissionController).
     enabled: true
+    # Updater automatically evicts pods and applies recommendations.
     updater:
       enabled: false
+    # Admission Controller mutates pods at creation time to apply recommendations
     admissionController:
       enabled: false
     # Recommender calculates recommended CPU/memory requests for your pods.
@@ -76,10 +78,15 @@ goldilocks:
 
   metrics-server:
     enabled: true
+    # Registers the aggregated API (apis/metrics.k8s.io/v1beta1) so kubectl top pods/nodes works.
     apiService:
       create: true
     extraArgs:
+      # Instructs Metrics Server to connect to kubelets using InternalIP instead of DNS/Hostname/ExternalIP.
       - --kubelet-preferred-address-types=InternalIP
+      # if not set, goldilocks-in-cluster-metrics-server pod fails prob
+      # Failed to scrape node, err="Get https://infra-node:10250/metrics/resource"
+      - --kubelet-insecure-tls
     resources:
       requests:
         cpu: 25m
