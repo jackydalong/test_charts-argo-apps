@@ -145,7 +145,7 @@ kps:
  
   alertmanager:
     alertmanagerSpec:
-      replicas: 1
+      replicas: 0
       logFormat: json
       storage:
         volumeClaimTemplate:
@@ -154,11 +154,11 @@ kps:
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
-                storage: 1Gi
+                storage: 500Mi
 
   prometheus:
     prometheusSpec:
-      replicas: 1
+      replicas: 0
       storageSpec:
         volumeClaimTemplate:
           spec:
@@ -166,5 +166,5 @@ kps:
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
-                storage: 1.1Gi
+                storage: 500Mi
 
