@@ -1,0 +1,102 @@
+argoNamespace: goldilocks
+
+goldilocks:
+  nameOverride: goldilocks
+  fullnameOverride: goldilocks
+
+  controller:
+    flags:
+      on-by-default: true
+      exclude-namespaces: "arc-system,arc-workers,crowdstrike,crowdstrike-agent,monitoring,kube-system"
+      ignore-controller-kind: "Job,CronJob"
+    rbac:
+      create: true
+
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: eks.amazonaws.com/compute-type
+                  operator: NotIn
+                  values:
+                    - fargate
+
+    resources:
+      requests:
+        cpu: 25m
+        memory: 256Mi
+      limits:
+        cpu: 100m
+        memory: 256Mi
+
+  vpa:
+    # Enables installation of VPA components (Recommender, optionally Updater, AdmissionController).
+    enabled: true
+    updater:
+      enabled: false
+    admissionController:
+      enabled: false
+    # Recommender calculates recommended CPU/memory requests for your pods.
+    recommender:
+      # Creates a PodMonitor CR (Prometheus Operator object)
+      # so Prometheus scrapes VPA metrics from the recommender pod
+      podMonitor:
+        enabled: true
+      # flags passed to the recommender container.
+      extraArgs:
+        # Prometheus service to query for historical metrics.
+        prometheus-address: |
+          http://kps-prometheus.monitoring.svc.cluster.local:9090
+        # use Prometheus instead of the default metrics API as the data source.
+        storage: prometheus
+        # Tells recommender which Prometheus job provides cAdvisor metrics (container CPU/memory usage).
+        # In kube-prometheus-stack, that’s usually "kubelet".
+        prometheus-cadvisor-job-name: 'kubelet'
+        # Label used in Prometheus metrics that corresponds to pod name.
+        container-pod-name-label: 'pod'
+        container-namespace-label: 'namespace'
+        container-name-label: 'container'
+        # PromQL query for pod labels
+        # Means fetch pod label metrics from kube-state-metrics job, over a 30-day history.
+        metric-for-pod-labels: 'kube_pod_labels{job="kps-kube-state-metrics"}[30d]'
+        pod-namespace-label: 'namespace'
+        pod-name-label: 'pod'
+        # Prefix applied to pod labels in metrics storage.
+        pod-label-prefix: 'label_'
+        # Look back 30 days of Prometheus history when computing recommendations.
+        history-length: '30d'
+        # Rate limits for recommender queries to the Kubernetes API server.
+        # (QPS = queries per second, Burst = max burst allowed.)
+        kube-api-qps: '10'
+        kube-api-burst: '20'
+        # Do not recommend less than 10 millicores CPU (safety floor)
+        pod-recommendation-min-cpu-millicores: '10'
+        pod-recommendation-min-memory-mb: '20'
+
+  metrics-server:
+    enabled: true
+    apiService:
+      create: true
+    extraArgs:
+      - --kubelet-preferred-address-types=InternalIP
+    resources:
+      requests:
+        cpu: 25m
+        memory: 256Mi
+      limits:
+        cpu: 100m
+        memory: 256Mi
+
+
+  dashboard:
+    enabled: true
+    replicaCount: 1
+
+    resources:
+      requests:
+        cpu: 25m
+        memory: 256Mi
+      limits:
+        cpu: 100m
+        memory: 256Mi
