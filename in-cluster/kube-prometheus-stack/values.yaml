@@ -158,6 +158,7 @@ kps:
 
   prometheus:
     prometheusSpec:
+      replicas: 0
       storageSpec:
         volumeClaimTemplate:
           spec:
@@ -165,5 +166,5 @@ kps:
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
-                storage: 1Gi
+                storage: 1.1Gi
 
