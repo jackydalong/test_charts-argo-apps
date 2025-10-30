@@ -16,7 +16,7 @@ cert-manager:
   cainjector:
     resources:
       requests:
-        cpu: 10
+        cpu: 10m
         memory: 50Mi
       limits:
         memory: 50Mi
