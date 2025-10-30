@@ -1,0 +1,12 @@
+apiVersion: v2
+name: nginx-ingress-slim
+description: Slim chart that pulls NGINX Ingress Controller as a dependency
+type: application
+version: 0.1.0
+appVersion: "4.11.2"  # example: upstream ingress-nginx app version
+
+dependencies:
+  - name: ingress-nginx
+    version: "4.11.2"   # check latest with: helm search repo ingress-nginx
+    repository: "https://kubernetes.github.io/ingress-nginx"
+    alias: nginx
