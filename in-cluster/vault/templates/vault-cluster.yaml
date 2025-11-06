@@ -187,12 +187,6 @@ spec:
     # Use an existing secret (so you don’t use the chart-auto-generated cert)
     secretName: vault-server-tls
 
-    # In case you want chart to generate but you still want control over SANs
-    TLSAdditionalHosts:
-      - localhost
-      - host.docker.internal # aligns with api_addr
-      - vault.vault.svc
-
   serviceRegistrationEnabled: true
   serviceMonitorEnabled: true
   statsdDisabled: true
@@ -420,6 +414,11 @@ spec:
           }
 
     auth:
+      # creating roles that target the default kubernetes auth mount 
+      # (or an existing mount at auth/kubernetes/) — 
+      # it doesn’t need host/CA/token_reviewer config 
+      # because it’s not creating a new mount pointing to an external cluster.
+      
       - type: kubernetes
         roles:
           - name: default
