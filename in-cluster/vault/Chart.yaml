@@ -23,4 +23,4 @@ dependencies:
   - name: vault-operator
     version: *version
     repository: oci://ghcr.io/bank-vaults/helm-charts
-    # alias: vault
+    alias: vault
