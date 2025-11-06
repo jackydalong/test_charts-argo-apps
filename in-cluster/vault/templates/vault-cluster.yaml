@@ -5,7 +5,7 @@ metadata:
 spec:
   size: 3
   image: hashicorp/vault:1.18
-  bankVaultsImage: bank-vaults/bank-vaults:v1.32.0
+  bankVaultsImage: ghcr.io/bank-vaults/bank-vaults:v1.32.0
   serviceAccount: vault-in-cluster
 
   # Scheduler
