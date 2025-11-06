@@ -183,10 +183,6 @@ spec:
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     log_format: json
 
-  tls:
-    # Use an existing secret (so you don’t use the chart-auto-generated cert)
-    secretName: vault-server-tls
-
   serviceRegistrationEnabled: true
   serviceMonitorEnabled: true
   statsdDisabled: true
