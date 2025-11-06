@@ -1,0 +1,454 @@
+apiVersion: "vault.banzaicloud.com/v1alpha1"
+kind: "Vault"
+metadata:
+  name: vault-cn
+spec:
+  size: 3
+  image: hashicorp/vault:1.18
+  bankVaultsImage: bank-vaults/bank-vaults:v1.32.0
+  serviceAccount: vault-cn-mgmt
+
+  # Scheduler
+  podAntiAffinity: topology.kubernetes.io/zone
+
+  # For ALB ingress with external-DNS, it is ok to use ClusterIP
+  # serviceType: ClusterIP
+
+  # In local env, there is no external DNS;
+  # we need use NodePort, so to 配合 the config section below
+  serviceType: NodePort
+
+  # Ingress: 
+  # we use AWS ALB ingress in production to expose vault to be accessed via DNS by other clusters 
+  # For local env w/o DNS, do we still need ingress ? You don’t need it if you expose Vault’s port directly to your host using NodePort or Kind port mapping.
+  # Because:
+  #   vswh in the prod cluster can reach Vault at https://host.docker.internal:8200.
+  #   No Ingress Controller or DNS resolution is necessary.
+  #   Only keep NGINX Ingress if you want to practice ingress behavior or experiment with path rewriting and TLS termination.
+  # ingress:
+  #   annotations:
+  #     # --- NGINX-specific settings ---
+  #     kubernetes.io/ingress.class: nginx-ic              # use your nginx ingress class
+  #     nginx.ingress.kubernetes.io/ssl-redirect: "true"   # force redirect HTTP→HTTPS
+  #     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # Vault uses TLS internally, Informs NGINX that the backend service (vault-cn:8200) expects HTTPS. Otherwise, NGINX tries to speak plain HTTP and gets SSL errors.
+  #     nginx.ingress.kubernetes.io/rewrite-target: /      # needed if path != /
+
+  #     # --- Optional if you use cert-manager for TLS ---
+  #     cert-manager.io/cluster-issuer: my-issuer
+
+  #   spec:
+  #     ingressClassName: nginx-ic
+  #     tls:
+  #       - hosts:
+  #           - vault.infra.local
+  #         secretName: vault-tls     # secret containing cert + key for vault
+  #     rules:
+  #       - host: vault.infra.local
+  #         http:
+  #           paths:
+  #             - path: /
+  #               pathType: Prefix
+  #               backend:
+  #                 service:
+  #                   name: vault-cn
+  #                   port:
+  #                     number: 8200
+  ingress: {}
+
+  # Resources limits
+  resources:
+    vault:
+      requests:
+        cpu: 25m
+        memory: 100Mi
+      limits:
+        memory: 100Mi
+        cpu: 50m
+
+  # chown workaround
+  secretInitsConfig:
+    - name: SKIP_CHOWN
+      value: "true"
+
+  vaultInitContainers:
+    - name: config-permission
+      image: docker.io/library/busybox:latest
+      command:
+        - /bin/sh
+        - -c
+        - "chmod g+r,o+r /vault/config/vault.json"
+      volumeMounts:
+        - mountPath: /vault/config
+          name: vault-config
+      resources:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+
+  # Raft storage config
+  volumeClaimTemplates:
+    - metadata:
+        name: vault-raft
+      spec:
+        storageClassName: standard
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 200Mi
+
+  volumes:
+    - name: vault-audit-logs
+      persistentVolumeClaim:
+        claimName: vault-audit-logs
+
+  volumeMounts:
+    - name: vault-raft
+      mountPath: /vault/file
+    - name: vault-audit-logs
+      mountPath: /vault/audit
+
+  # Auto-unseal config
+  unsealConfig:
+    kubernetes:
+      secretNamespace: vault
+
+  # Support for distributing the generated CA certificate Secret to other namespaces.
+  # Define a list of namespaces or use ["*"] for all namespaces.
+  caNamespaces: ["*"]
+
+  # Core Vault config definition
+  config:
+    cluster_name: cn-vault
+    # enable UI
+    ui: true
+    storage:
+      raft:
+        path: /vault/file
+    seal:
+      # awskms:
+      #   region: cn-northwest-1
+      #   kms_key_id: 1ff87cc0-e933-41ae-86bb-e4f8f4f8bd3e
+      shamir:
+        secret_shares: 1
+        secret_threshold: 1
+    listener:
+      tcp:
+        # "[::]:8200" binds to the container’s internal interface only.
+        # vswh in another Kind cluster cannot reach it 
+        # unless you expose it on the host.
+        # address: "[::]:8200"
+        # cluster_address: "[::]:8201"
+        #
+        # This binds Vault to all available interfaces, so Docker port mapping or host network exposure will work.
+        # Each Kind “node” container will then listen on port 8200 visible from your Mac’s localhost (after port mapping).
+        
+        address: "0.0.0.0:8200"
+        cluster_address: "0.0.0.0:8201"
+        
+        # Ensure server.crt includes domain in api_addr
+        # by tls.TLSAdditionalHosts
+
+        tls_cert_file: /vault/tls/server.crt
+        tls_key_file: /vault/tls/server.key
+
+        telemetry:
+          unauthenticated_metrics_access: true
+    telemetry:
+      disable_hostname: true
+      prometheus_retention_time: "24h"
+    
+    # DNS of Vault service within same K8s cluster (internal access).
+    # api_addr: https://vault.vault:8200
+    #
+    # host.docker.internal is the special DNS inside Docker that points to your macOS host.
+    # When you expose port 8200 on your infra Kind node → your Mac (and other Docker containers) can access https://host.docker.internal:8200.
+    # vswh in your prod Kind cluster (running in another container) can also reach that address.
+    # Alternatively, you can use the IP address of your Mac (ifconfig | grep inet) if host.docker.internal doesn’t work in your Kind setup.
+    #
+    # api_addr is for Vault's Internal and External Communication
+    # has two main roles:
+    #   Client Redirection (HA): When a request hits a standby Vault node in an HA cluster (like your size: 3 setup), the standby node redirects the client to the active (leader) node. It uses the configured api_addr for this redirection.
+    #   Advertised Address: It's the address Vault uses to advertise itself to other components, such as its own plugins or external clients, as the correct endpoint.
+    api_addr: https://host.docker.internal:8200
+    
+    # This value tells Vault what address other Vault pods should use when forming a cluster (Raft or HA mode).
+    # When Vault runs with integrated storage (storage.raft), it forms a Raft cluster by connecting to each member’s cluster_addr.
+    # Example:
+    # Pod1 env: POD_NAME=vault-0
+    # Pod2 env: POD_NAME=vault-1
+    # So vault-0 announces https://vault-0:8201 and others join via that address.
+    # This allows Vault peers to replicate storage and coordinate leader elections.
+    #
+    cluster_addr: "https://${.Env.POD_NAME}:8201"
+    log_format: json
+
+  tls:
+    # Use an existing secret (so you don’t use the chart-auto-generated cert)
+    secretName: vault-server-tls
+
+    # In case you want chart to generate but you still want control over SANs
+    TLSAdditionalHosts:
+      - localhost
+      - host.docker.internal # aligns with api_addr
+      - vault.vault.svc
+
+  serviceRegistrationEnabled: true
+  serviceMonitorEnabled: true
+  statsdDisabled: true
+
+  # Pass secret to bank-vaults environment variables.
+  # allows vswh in the prod cluster to authenticate to Vault in the infra cluster using its own cluster’s ServiceAccount tokens.
+  # it is for Vault (running in infra) to know how to validate tokens issued by the prod cluster’s Kubernetes API
+  
+  envsConfig:
+    - name: K8S_CN_PROD_JWT_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: kubernetes-cn-prod-jwt
+          key: token_reviewer_jwt
+
+  # External policies config
+  externalConfig:
+    purgeUnmanagedConfig:
+      enabled: true
+      exclude:
+        secrets: true
+        auth: true
+    audit:
+      - type: file
+        options:
+          file_path: stdout
+          hmac_accessor: "false"
+          log_raw: "true"
+    policies:
+      - name: admin
+        rules: |
+          # Allow managing leases
+          path "sys/leases/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # Manage auth methods broadly across Vault
+          path "auth/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # Create, update, and delete auth methods
+          path "sys/auth/*"
+          {
+            capabilities = ["create", "update", "delete", "sudo"]
+          }
+
+          # List auth methods
+          path "sys/auth"
+          {
+            capabilities = ["read"]
+          }
+
+          # List existing policies
+          path "sys/policies/acl"
+          {
+            capabilities = ["read","list"]
+          }
+
+          # Create and manage ACL policies
+          path "sys/policies/acl/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # List, create, update, and delete key/value secrets
+          path "secret/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # Manage secret engines
+          path "sys/mounts/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # List existing secret engines.
+          path "sys/mounts"
+          {
+            capabilities = ["read"]
+          }
+
+          # Read health checks
+          path "sys/health"
+          {
+            capabilities = ["read", "sudo"]
+          }
+      - name: developer
+        rules: |
+          # List all secrets
+          path "secret/*"
+          {
+            capabilities = ["list"]
+          }
+
+          # CRUDL secrets in staging
+          path "secret/data/kubernetes/staging/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list"]
+          }
+          path "secret/metadata/kubernetes/staging/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list"]
+          }
+
+          # Create and list secrets in production
+          path "secret/data/kubernetes/prod/*"
+          {
+            capabilities = ["create", "list"]
+          }
+          path "secret/metadata/kubernetes/prod/*"
+          {
+            capabilities = ["create", "list"]
+          }
+
+          # List secret engines
+          path "sys/mounts/*"
+          {
+            capabilities = ["read", "list"]
+          }
+
+          # List existing secret engines.
+          path "sys/mounts"
+          {
+            capabilities = ["read"]
+          }
+
+          # Read health checks
+          path "sys/health"
+          {
+            capabilities = ["read"]
+          }
+      - name: power_user
+        rules: |
+          # List all secrets
+          path "secret/*"
+          {
+            capabilities = ["list"]
+          }
+
+          # CRUDL secrets in staging
+          path "secret/data/kubernetes/staging/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list"]
+          }
+          path "secret/metadata/kubernetes/staging/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list"]
+          }
+
+          # CRUDL secrets in production
+          path "secret/data/kubernetes/prod/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list"]
+          }
+          path "secret/metadata/kubernetes/prod/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list"]
+          }
+
+          # List secret engines
+          path "sys/mounts/*"
+          {
+            capabilities = ["read", "list"]
+          }
+
+          # List existing secret engines.
+          path "sys/mounts"
+          {
+            capabilities = ["read"]
+          }
+
+          # Read health checks
+          path "sys/health"
+          {
+            capabilities = ["read"]
+          }
+
+          # Manage OIDC Provider settings
+          path "/identity/oidc/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # Read and write Raft status and snapshots
+          path "/sys/storage/raft/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # Use built-in swagger UI
+          path "/sys/internal/specs/openapi"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+      - name: readonly_secrets
+        rules: |
+          path "secret/*" {
+            capabilities = ["read", "list"]
+          }
+      - name: kube_mgmt_namespaced
+        rules: |
+          path "secret/data/kubernetes/mgmt/{{ printf "{{identity.entity.aliases.auth_kubernetes_958ce766.metadata.service_account_namespace}}" }}/*" {
+            capabilities = ["read", "list"]
+          }
+      # - name: kube_prod_namespaced
+      #   rules: |
+      #     path "secret/data/kubernetes/prod/{{ printf "{{identity.entity.aliases.auth_kubernetes_4680e115.metadata.service_account_namespace}}" }}/*" {
+      #       capabilities = ["read", "list"]
+      #     }
+      - name: kube_tfc_operator
+        rules: |
+          path "secret/data/*" {
+            capabilities = ["create", "read", "update", "delete"]
+          }
+          path "secret/metadata/*" {
+            capabilities = ["create", "read", "update", "delete"]
+          }
+          path "auth/token/*" {
+            capabilities = ["create", "read", "update", "delete"]
+          }
+
+    auth:
+      - type: kubernetes
+        roles:
+          - name: default
+            bound_service_account_names: ["*"]
+            bound_service_account_namespaces: ["*"]
+            policies: kube_mgmt_namespaced
+            ttl: 1h
+      # - type: kubernetes
+      #   path: "kubernetes-cn-prod"
+      #   config:
+      #     token_reviewer_jwt: "${env `K8S_CN_PROD_JWT_TOKEN`}"
+      #     kubernetes_ca_cert: |
+      #       -----BEGIN CERTIFICATE-----
+            
+      #       -----END CERTIFICATE-----
+      #     kubernetes_host: https://50A200A56041D5BD8C5A0D41DD95FC6F.sk1.cn-northwest-1.eks.amazonaws.com.cn
+      #     disable_local_ca_jwt: true
+      #   roles:
+      #     - name: default
+      #       bound_service_account_names: ["*"]
+      #       bound_service_account_namespaces: ["*"]
+      #       policies: kube_prod_namespaced
+      #       ttl: 1h
+
+    secrets:
+      - type: kv
+        path: secret
+        options:
+          version: 2
+        configuration:
+          config:
+            - max_versions: 3

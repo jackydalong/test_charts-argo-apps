@@ -1,0 +1,10 @@
+# vault:
+#   image:
+#     repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/vault-operator
+#   serviceAccount:
+#     annotations:
+#       eks.amazonaws.com/role-arn: arn:aws-cn:iam::965232795465:role/eks/irsa/vault
+#   bankVaults:
+#     image:
+#       repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/bank-vaults
+
