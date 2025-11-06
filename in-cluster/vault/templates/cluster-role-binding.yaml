@@ -9,5 +9,5 @@ roleRef:
   name: vault-auth-role
 subjects:
 - kind: ServiceAccount
-  name: vault-cn-mgmt
+  name: vault-in-cluster
   namespace: vault
