@@ -32,10 +32,10 @@ spec:
   #     nginx.ingress.kubernetes.io/ssl-redirect: "true"   # force redirect HTTP→HTTPS
   #     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # Vault uses TLS internally, Informs NGINX that the backend service (vault-cn:8200) expects HTTPS. Otherwise, NGINX tries to speak plain HTTP and gets SSL errors.
   #     nginx.ingress.kubernetes.io/rewrite-target: /      # needed if path != /
-
+  #
   #     # --- Optional if you use cert-manager for TLS ---
   #     cert-manager.io/cluster-issuer: my-issuer
-
+  #
   #   spec:
   #     ingressClassName: nginx-ic
   #     tls:
@@ -59,9 +59,9 @@ spec:
     vault:
       requests:
         cpu: 25m
-        memory: 100Mi
+        memory: 250Mi
       limits:
-        memory: 100Mi
+        memory: 500Mi
         cpu: 50m
 
   # chown workaround
