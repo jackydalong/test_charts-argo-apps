@@ -1,0 +1,13 @@
+nfsclient:
+  nfs:
+    server: nfs-server                  # or actual IP of NFS server container
+    path: /opt/sfw                      # exported path
+  storageClass:
+    name: nfs-client                    # the StorageClass name created
+    defaultClass: true                  # make it default if you want
+    allowVolumeExpansion: true          # optional
+    mountOptions: []                    # optional mount options for PVs
+  # Optional extra parameters
+  provisionerName: k8s-sigs.io/nfs-subdir-external-provisioner
+  pathPattern: "${.PVC.namespace}-${.PVC.name}"  # how directories on NFS share will be named
+  onDelete: delete                       # or retain
