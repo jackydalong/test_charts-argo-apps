@@ -10,4 +10,4 @@ spec:
   resources:
     requests:
       storage: 200Mi
-  storageClassName: standard
+  storageClassName: nfs-client
