@@ -1,8 +1,8 @@
 apiVersion: v2
 type: application
 name: vault
-version: &version "1.23.0"
-appVersion: &appVersion latest
+version: &version "1.27.0" # UPGRADED: Using a newer, stable operator version.
+appVersion: &appVersion "1.19.0" # UPGRADED: Set Vault image version
 description: Kubernetes operator for Hashicorp Vault
 icon: https://avatars.githubusercontent.com/u/129937617
 keywords:
