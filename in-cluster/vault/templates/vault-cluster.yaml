@@ -202,12 +202,12 @@ spec:
   # allows vswh in the prod cluster to authenticate to Vault in the infra cluster using its own cluster’s ServiceAccount tokens.
   # it is for Vault (running in infra) to know how to validate tokens issued by the prod cluster’s Kubernetes API
   
-  envsConfig:
-    - name: K8S_CN_PROD_JWT_TOKEN
-      valueFrom:
-        secretKeyRef:
-          name: kubernetes-cn-prod-jwt
-          key: token_reviewer_jwt
+  # envsConfig:
+  #   - name: K8S_CN_PROD_JWT_TOKEN
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: kubernetes-cn-prod-jwt
+  #         key: token_reviewer_jwt
 
   # External policies config
   externalConfig:
