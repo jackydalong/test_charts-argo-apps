@@ -136,20 +136,22 @@ spec:
         # "[::]:8200" binds to the container’s internal interface only.
         # vswh in another Kind cluster cannot reach it 
         # unless you expose it on the host.
-        # address: "[::]:8200"
-        # cluster_address: "[::]:8201"
+
+        address: "[::]:8200"
+        cluster_address: "[::]:8201"
+
         #
         # This binds Vault to all available interfaces, so Docker port mapping or host network exposure will work.
         # Each Kind “node” container will then listen on port 8200 visible from your Mac’s localhost (after port mapping).
         
-        address: "0.0.0.0:8200"
-        cluster_address: "0.0.0.0:8201"
+        # address: "0.0.0.0:8200"
+        # cluster_address: "0.0.0.0:8201"
         
         # Ensure server.crt includes domain in api_addr
         # by tlsAdditionalHosts
 
-        # tls_cert_file: /vault/tls/server.crt
-        # tls_key_file: /vault/tls/server.key
+        tls_cert_file: /vault/tls/server.crt
+        tls_key_file: /vault/tls/server.key
 
         telemetry:
           unauthenticated_metrics_access: true
@@ -158,8 +160,10 @@ spec:
       prometheus_retention_time: "24h"
     
     # DNS of Vault service within same K8s cluster (internal access).
-    # api_addr: https://vault.vault:8200
-    #
+    
+    api_addr: https://vault.vault:8200
+    
+    
     # host.docker.internal is the special DNS inside Docker that points to your macOS host.
     # When you expose port 8200 on your infra Kind node → your Mac (and other Docker containers) can access https://host.docker.internal:8200.
     # vswh in your prod Kind cluster (running in another container) can also reach that address.
@@ -169,7 +173,8 @@ spec:
     # has two main roles:
     #   Client Redirection (HA): When a request hits a standby Vault node in an HA cluster (like your size: 3 setup), the standby node redirects the client to the active (leader) node. It uses the configured api_addr for this redirection.
     #   Advertised Address: It's the address Vault uses to advertise itself to other components, such as its own plugins or external clients, as the correct endpoint.
-    api_addr: https://host.docker.internal:8200
+    
+    #api_addr: https://host.docker.internal:8200
     
     # This value tells Vault what address other Vault pods should use when forming a cluster (Raft or HA mode).
     # When Vault runs with integrated storage (storage.raft), it forms a Raft cluster by connecting to each member’s cluster_addr.
@@ -179,6 +184,7 @@ spec:
     # So vault-0 announces https://vault-0:8201 and others join via that address.
     # This allows Vault peers to replicate storage and coordinate leader elections.
     #
+    
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     log_format: json
 
