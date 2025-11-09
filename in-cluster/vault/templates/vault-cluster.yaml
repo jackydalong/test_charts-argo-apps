@@ -88,7 +88,7 @@ spec:
     telemetry:
       disable_hostname: true
       prometheus_retention_time: "24h"
-    api_addr: https://vault.vault:8200
+    api_addr: https://vault-cn.vault:8200
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     log_format: json
 
