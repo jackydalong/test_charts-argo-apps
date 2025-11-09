@@ -1,4 +1,5 @@
-# vault:
+vault:
+  tlsDisable: true
 #   image:
 #     repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/vault-operator
 #   serviceAccount:

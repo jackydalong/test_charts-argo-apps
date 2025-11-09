@@ -182,12 +182,13 @@ spec:
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     log_format: json
 
-  # tlsAdditionalHosts
-  tlsAdditionalHosts:
-    - localhost
-    - host.docker.internal
-    - vault-cn.vault.svc
-    - vault.vault.svc
+  tlsDisable: true
+
+  # tlsAdditionalHosts:
+  #   - localhost
+  #   - host.docker.internal
+  #   - vault-cn.vault.svc
+  #   - vault.vault.svc
 
   serviceRegistrationEnabled: true
   serviceMonitorEnabled: true
