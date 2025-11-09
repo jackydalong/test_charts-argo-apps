@@ -5,11 +5,11 @@ metadata:
   name: vault-cn
 spec:
   size: 3
-  image: hashicorp/vault:1.19.0 # UPGRADED: Vault version compatible with operator chart
-  bankVaultsImage: ghcr.io/bank-vaults/bank-vaults:v1.36.0 # UPGRADED: Stable bank-vaults image
+  image: hashicorp/vault:1.18 # REVISED: Aligned with the appVersion in Chart.yaml
+  bankVaultsImage: ghcr.io/bank-vaults/bank-vaults:v1.34.0 # REVISED: A slightly newer, compatible bank-vaults image
   serviceAccount: vault-in-cluster
 
-  podAntiAffinity: topology.kubernetes.io/zone # Re-added this for best practice in HA
+  podAntiAffinity: topology.kubernetes.io/zone
   serviceType: ClusterIP
 
   resources:
@@ -21,7 +21,6 @@ spec:
         memory: 500Mi
         cpu: 50m
 
-  # *** NEW: Explicitly define the bank-vaults command for clarity/stability ***
   bankVaults:
     command:
       - bank-vaults
@@ -31,7 +30,6 @@ spec:
       - --raft
       - --raft-leader-address
       - https://vault-cn:8200
-  # *************************************************************************
 
   secretInitsConfig:
     - name: SKIP_CHOWN
@@ -56,9 +54,6 @@ spec:
     - metadata:
         name: vault-raft
       spec:
-        # NOTE: Using 'nfs-client' for 'vault-raft' is non-standard for Raft
-        # and prone to failure. Use the local K8s storage class if possible (e.g., 'standard').
-        # Sticking to 'nfs-client' as per your config, but this is a potential long-term issue.
         storageClassName: nfs-client 
         accessModes:
           - ReadWriteOnce
@@ -95,27 +90,23 @@ spec:
         secret_threshold: 1
     listener:
       tcp:
-        # *** CRITICAL FIX: Bind to POD_IP (operator variable) for stability in local KIND/Docker ***
+        # ** FIX: Bind to POD_IP to solve Raft binding/discovery issue in Kind **
         address: "${.Env.POD_IP}:8200"
         cluster_address: "${.Env.POD_IP}:8201"
-        # ***************************************************************************************
+        # *******************************************************************
         tls_cert_file: /vault/tls/server.crt
         tls_key_file: /vault/tls/server.key
         tls_client_ca_file: /vault/tls/ca.crt
-
-        # *** REMOVED: tls_disable_client_certs and tls_skip_verify ***
-        # These flags indicate an underlying TLS misconfiguration that should be fixed via binding
-        # or SANs, not bypassed.
 
         telemetry:
           unauthenticated_metrics_access: true
     telemetry:
       disable_hostname: true
       prometheus_retention_time: "24h"
-    # *** CRITICAL FIX: Use POD_IP for cluster_addr for Raft stability in local KIND/Docker ***
+    # ** FIX: Use POD_IP for Raft stability **
     api_addr: https://vault-cn.vault:8200
     cluster_addr: "https://${.Env.POD_IP}:8201"
-    # ****************************************************************************************
+    # ****************************************
     log_format: json
 
 
