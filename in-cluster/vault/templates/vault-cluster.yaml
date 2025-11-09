@@ -3,12 +3,10 @@ kind: "Vault"
 metadata:
   name: vault-cn
 spec:
-  size: 3
+  size: 1
   image: hashicorp/vault:1.18
   bankVaultsImage: ghcr.io/bank-vaults/bank-vaults:v1.32.0
   serviceAccount: vault-in-cluster
-
-  podAntiAffinity: topology.kubernetes.io/zone
 
   serviceType: ClusterIP
 
@@ -89,7 +87,7 @@ spec:
     telemetry:
       disable_hostname: true
       prometheus_retention_time: "24h"
-    api_addr: https://vault-cn.vault:8200
+    api_addr: https://vault.vault:8200
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     log_format: json
 
