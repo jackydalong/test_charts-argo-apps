@@ -1,5 +1,5 @@
-vault:
-  tlsDisable: true
+# vault:
+#   tlsDisable: true
 #   image:
 #     repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/vault-operator
 #   serviceAccount:
@@ -8,10 +8,8 @@ vault:
 #   bankVaults:
 #     image:
 #       repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/bank-vaults
-
   # # 1. Enable certificate generation
   # tlsGenerate: true
-  
   # config:
   #   # 2. Add the hosts to the certificate's Subject Alternative Name (SAN) list
   #   tlsAdditionalHosts:
