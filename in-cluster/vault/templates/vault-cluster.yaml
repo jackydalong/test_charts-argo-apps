@@ -162,7 +162,7 @@ spec:
     # DNS of Vault service within same K8s cluster (internal access).
     #api_addr: https://vault.vault:8200
 
-    api_addr: "https://${env `POD_IP`}:8200"
+    api_addr: "https://${POD_IP}:8200"
     
     # host.docker.internal is the special DNS inside Docker that points to your macOS host.
     # When you expose port 8200 on your infra Kind node → your Mac (and other Docker containers) can access https://host.docker.internal:8200.
