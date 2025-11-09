@@ -148,8 +148,8 @@ spec:
         # Ensure server.crt includes domain in api_addr
         # by tlsAdditionalHosts
 
-        tls_cert_file: /vault/tls/server.crt
-        tls_key_file: /vault/tls/server.key
+        # tls_cert_file: /vault/tls/server.crt
+        # tls_key_file: /vault/tls/server.key
 
         telemetry:
           unauthenticated_metrics_access: true
