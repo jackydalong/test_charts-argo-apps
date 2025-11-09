@@ -150,8 +150,8 @@ spec:
         # Ensure server.crt includes domain in api_addr
         # by tlsAdditionalHosts
 
-        tls_cert_file: /vault/tls/server.crt
-        tls_key_file: /vault/tls/server.key
+        # tls_cert_file: /vault/tls/server.crt
+        # tls_key_file: /vault/tls/server.key
 
         telemetry:
           unauthenticated_metrics_access: true
@@ -160,8 +160,10 @@ spec:
       prometheus_retention_time: "24h"
     
     # DNS of Vault service within same K8s cluster (internal access).
-    api_addr: https://vault-cn.vault:8200
+    #api_addr: https://vault-cn.vault:8200
     
+    api_addr: http://vault-cn.vault:8200
+
     # host.docker.internal is the special DNS inside Docker that points to your macOS host.
     # When you expose port 8200 on your infra Kind node → your Mac (and other Docker containers) can access https://host.docker.internal:8200.
     # vswh in your prod Kind cluster (running in another container) can also reach that address.
@@ -183,7 +185,9 @@ spec:
     # This allows Vault peers to replicate storage and coordinate leader elections.
     #
 
-    cluster_addr: "https://${.Env.POD_NAME}:8201"
+    #cluster_addr: "https://${.Env.POD_NAME}:8201"
+
+    cluster_addr: "http://${.Env.POD_NAME}:8201"
     log_format: json
 
   # tlsAdditionalHosts:

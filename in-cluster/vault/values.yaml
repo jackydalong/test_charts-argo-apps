@@ -1,19 +1,23 @@
-# vault:
-#   tlsDisable: true
-#   image:
-#     repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/vault-operator
-#   serviceAccount:
-#     annotations:
-#       eks.amazonaws.com/role-arn: arn:aws-cn:iam::965232795465:role/eks/irsa/vault
-#   bankVaults:
-#     image:
-#       repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/bank-vaults
-  # # 1. Enable certificate generation
-  # tlsGenerate: true
-  # config:
-  #   # 2. Add the hosts to the certificate's Subject Alternative Name (SAN) list
-  #   tlsAdditionalHosts:
-  #     - localhost
-  #     - host.docker.internal 
-  #     - vault-cn.vault.svc
-  #     - vault.vault.svc
+vault:
+  vaultContainerSpec:
+    livenessProbe:
+      httpGet:
+        scheme: HTTP
+        path: /v1/sys/health?standbyok=true
+        port: 8200
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    readinessProbe:
+      httpGet:
+        scheme: HTTP
+        path: /v1/sys/health?standbyok=true&perfstandbyok=true&drsecondarycode=299
+        port: 8200
+      initialDelaySeconds: 5
+      periodSeconds: 5
+    startupProbe:
+      httpGet:
+        scheme: HTTP
+        path: /v1/sys/init
+        port: 8200
+      periodSeconds: 10
+      failureThreshold: 18
