@@ -146,7 +146,7 @@ spec:
         cluster_address: "0.0.0.0:8201"
         
         # Ensure server.crt includes domain in api_addr
-        # by tls.TLSAdditionalHosts
+        # by tlsAdditionalHosts
 
         tls_cert_file: /vault/tls/server.crt
         tls_key_file: /vault/tls/server.key
@@ -181,6 +181,13 @@ spec:
     #
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     log_format: json
+
+  # tlsAdditionalHosts
+  tlsAdditionalHosts:
+    - localhost
+    - host.docker.internal
+    - vault-cn.vault.svc
+    - vault.vault.svc
 
   serviceRegistrationEnabled: true
   serviceMonitorEnabled: true

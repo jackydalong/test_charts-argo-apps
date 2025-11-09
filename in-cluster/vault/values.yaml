@@ -1,4 +1,4 @@
-vault:
+# vault:
 #   image:
 #     repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/vault-operator
 #   serviceAccount:
@@ -8,13 +8,13 @@ vault:
 #     image:
 #       repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/bank-vaults
 
-  # 1. Enable certificate generation
-  tlsGenerate: true
+  # # 1. Enable certificate generation
+  # tlsGenerate: true
   
-  config:
-    # 2. Add the hosts to the certificate's Subject Alternative Name (SAN) list
-    tlsAdditionalHosts:
-      - localhost
-      - host.docker.internal 
-      - vault-cn.vault.svc
-      - vault.vault.svc
+  # config:
+  #   # 2. Add the hosts to the certificate's Subject Alternative Name (SAN) list
+  #   tlsAdditionalHosts:
+  #     - localhost
+  #     - host.docker.internal 
+  #     - vault-cn.vault.svc
+  #     - vault.vault.svc
