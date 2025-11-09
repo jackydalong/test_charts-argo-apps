@@ -8,9 +8,9 @@ spec:
   bankVaultsImage: ghcr.io/bank-vaults/bank-vaults:v1.32.0
   serviceAccount: vault-in-cluster
 
-  raftCluster:
-    enabled: true
-    selfHeal: true
+  # raftCluster:
+  #   enabled: true
+  #   selfHeal: true
 
   serviceType: ClusterIP
 
@@ -87,6 +87,10 @@ spec:
         tls_cert_file: /vault/tls/server.crt
         tls_key_file: /vault/tls/server.key
         tls_client_ca_file: /vault/tls/ca.crt
+
+        tls_disable_client_certs: true
+        tls_skip_verify: true
+
         telemetry:
           unauthenticated_metrics_access: true
     telemetry:
