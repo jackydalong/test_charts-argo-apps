@@ -3,10 +3,14 @@ kind: "Vault"
 metadata:
   name: vault-cn
 spec:
-  size: 1
+  size: 3
   image: hashicorp/vault:1.18
   bankVaultsImage: ghcr.io/bank-vaults/bank-vaults:v1.32.0
   serviceAccount: vault-in-cluster
+
+  raftCluster:
+    enabled: true
+    selfHeal: true
 
   serviceType: ClusterIP
 
