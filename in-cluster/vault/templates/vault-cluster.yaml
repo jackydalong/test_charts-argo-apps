@@ -182,8 +182,6 @@ spec:
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     log_format: json
 
-  tlsDisable: true
-
   # tlsAdditionalHosts:
   #   - localhost
   #   - host.docker.internal
