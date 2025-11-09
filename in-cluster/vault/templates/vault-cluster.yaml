@@ -44,7 +44,7 @@ spec:
     - metadata:
         name: vault-raft
       spec:
-        storageClassName: standard
+        storageClassName: nfs-client
         accessModes:
           - ReadWriteOnce
         resources:
@@ -71,29 +71,24 @@ spec:
   config:
     cluster_name: cn-vault
     ui: true
-    storage:
-      raft:
-        path: /vault/file
+    # storage:
+    #   raft:
+    #     path: /vault/file
     seal:
       shamir:
         secret_shares: 1
         secret_threshold: 1
     listener:
       tcp:
-
         address: "[::]:8200"
         cluster_address: "[::]:8201"
-
         tls_cert_file: /vault/tls/server.crt
         tls_key_file: /vault/tls/server.key
-
         telemetry:
           unauthenticated_metrics_access: true
     telemetry:
       disable_hostname: true
       prometheus_retention_time: "24h"
-    
-    
     api_addr: https://vault-cn.vault:8200
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     log_format: json
