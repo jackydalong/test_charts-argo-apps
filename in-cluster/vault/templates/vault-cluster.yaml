@@ -5,7 +5,7 @@ metadata:
   name: vault-cn
 spec:
   size: 3
-  image: hashicorp/vault:1.20.1 # REVISED: Aligned with the appVersion in Chart.yaml
+  image: hashicorp/vault:1.21.0 # REVISED: Aligned with the appVersion in Chart.yaml
   bankVaultsImage: ghcr.io/bank-vaults/bank-vaults:v1.32.0 # REVISED: A slightly newer, compatible bank-vaults image
   serviceAccount: vault-in-cluster
 

@@ -2,7 +2,7 @@
 apiVersion: v2
 type: application
 name: vault
-version: &version "1.23.0" # REVERTED: Using the originally known OCI version to fix dependency build
+version: &version "1.23.0" 
 appVersion: &appVersion latest
 description: Kubernetes operator for Hashicorp Vault
 icon: https://avatars.githubusercontent.com/u/129937617
