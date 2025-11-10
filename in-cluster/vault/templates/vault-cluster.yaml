@@ -6,7 +6,7 @@ metadata:
 spec:
   size: 3
   image: hashicorp/vault:1.18 # REVISED: Aligned with the appVersion in Chart.yaml
-  bankVaultsImage: ghcr.io/bank-vaults/bank-vaults:v1.34.0 # REVISED: A slightly newer, compatible bank-vaults image
+  bankVaultsImage: ghcr.io/bank-vaults/bank-vaults:v1.32.0 # REVISED: A slightly newer, compatible bank-vaults image
   serviceAccount: vault-in-cluster
 
   podAntiAffinity: topology.kubernetes.io/zone
