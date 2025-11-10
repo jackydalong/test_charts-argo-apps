@@ -21,15 +21,15 @@ spec:
         memory: 500Mi
         cpu: 50m
 
-  bankVaults:
-    command:
-      - bank-vaults
-      - unseal
-      - --init
-      - --auto
-      - --raft
-      - --raft-leader-address
-      - https://vault-cn:8200
+  # bankVaults:
+  #   command:
+  #     - bank-vaults
+  #     - unseal
+  #     - --init
+  #     - --auto
+  #     - --raft
+  #     - --raft-leader-address
+  #     - https://vault-cn:8200
 
   secretInitsConfig:
     - name: SKIP_CHOWN
