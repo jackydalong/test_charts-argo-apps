@@ -1,6 +1,6 @@
 nfsclient:
   nfs:
-    server: nfs-server                  # or actual IP of NFS server container
+    server: nfs-server                  # name in /etc/hosts or actual IP of NFS server container
     path: /opt/sfw                      # exported path
   storageClass:
     name: nfs-client                    # the StorageClass name created
