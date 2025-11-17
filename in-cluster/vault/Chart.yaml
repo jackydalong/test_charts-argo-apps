@@ -23,5 +23,5 @@ maintainers:
 dependencies:
   - name: vault-operator
     version: *version
-    repository: ls
+    repository: oci://ghcr.io/bank-vaults/helm-charts
     alias: vault
