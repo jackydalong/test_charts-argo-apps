@@ -3,6 +3,7 @@ vswh:
   #   repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/vault-secrets-webhook
   # vaultEnv:
   #   repository: 965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/github/bank-vaults/vault-env
+  replicaCount: 1
   env:
     ENABLE_JSON_LOG: "true"
     LOG_LEVEL: warn
