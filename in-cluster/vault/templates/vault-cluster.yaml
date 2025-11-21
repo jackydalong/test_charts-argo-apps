@@ -207,18 +207,26 @@ spec:
 
 
   config:
+    ui: true
+    cluster_name: cn-vault
     storage:
       raft:
         path: "/vault/file"
     listener:
       tcp:
-        address: "0.0.0.0:8200"
+        address: "[::]:8200"
+        cluster_address: "[::]:8201"
         tls_cert_file: /vault/tls/server.crt
         tls_key_file: /vault/tls/server.key
-    api_addr: https://vault-cn.default:8200
+        telemetry:
+          unauthenticated_metrics_access: true
+    telemetry:
+      disable_hostname: true
+      prometheus_retention_time: "24h"
+
+    api_addr: https://vault-cn.vault:8200
     cluster_addr: "https://${.Env.POD_NAME}:8201"
     log_format: json
-    ui: true
 
   serviceRegistrationEnabled: true
   serviceMonitorEnabled: true
@@ -238,8 +246,79 @@ spec:
 
   # External policies config
   externalConfig:
+    purgeUnmanagedConfig:
+      enabled: true
+      exclude:
+        secrets: true
+        auth: true
+    audit:
+      - type: file
+        options:
+          file_path: stdout
+          hmac_accessor: "false"
+          log_raw: "true"
     policies:
+      - name: admin
+        rules: |
+          # Allow managing leases
+          path "sys/leases/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
 
+          # Manage auth methods broadly across Vault
+          path "auth/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # Create, update, and delete auth methods
+          path "sys/auth/*"
+          {
+            capabilities = ["create", "update", "delete", "sudo"]
+          }
+
+          # List auth methods
+          path "sys/auth"
+          {
+            capabilities = ["read"]
+          }
+
+          # List existing policies
+          path "sys/policies/acl"
+          {
+            capabilities = ["read","list"]
+          }
+
+          # Create and manage ACL policies
+          path "sys/policies/acl/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # List, create, update, and delete key/value secrets
+          path "secret/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # Manage secret engines
+          path "sys/mounts/*"
+          {
+            capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+          }
+
+          # List existing secret engines.
+          path "sys/mounts"
+          {
+            capabilities = ["read"]
+          }
+
+          # Read health checks
+          path "sys/health"
+          {
+            capabilities = ["read", "sudo"]
+          }
       # - name: developer
       #   rules: |
       #     # List all secrets
@@ -349,11 +428,11 @@ spec:
       #       capabilities = ["create", "read", "update", "delete", "list", "sudo"]
       #     }
 
-      # - name: readonly_secrets
-      #   rules: |
-      #     path "secret/*" {
-      #       capabilities = ["read", "list"]
-      #     }
+      - name: readonly_secrets
+        rules: |
+          path "secret/*" {
+            capabilities = ["read", "list"]
+          }
       # - name: kube_prod_namespaced
       #   rules: |
       #     path "secret/data/kubernetes/prod/{{ printf "{{identity.entity.aliases.auth_kubernetes_4680e115.metadata.service_account_namespace}}" }}/*" {
