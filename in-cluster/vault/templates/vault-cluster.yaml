@@ -218,6 +218,10 @@ spec:
         cluster_address: "[::]:8201"
         tls_cert_file: /vault/tls/server.crt
         tls_key_file: /vault/tls/server.key
+
+        # Use this if clients shouldn't need a cert
+        # tls_disable_client_certs: true
+
         telemetry:
           unauthenticated_metrics_access: true
     telemetry:
@@ -450,12 +454,8 @@ spec:
       #       capabilities = ["create", "read", "update", "delete"]
       #     }
       - name: kube_mgmt_namespaced
-        # rules: |
-        #   path "secret/data/kubernetes/mgmt/{{ printf "{{identity.entity.aliases.auth_kubernetes_958ce766.metadata.service_account_namespace}}" }}/*" {
-        #     capabilities = ["read", "list"]
-        #   }
         rules: |
-          path "secret/data/kubernetes/mgmt/*" {
+          path "secret/data/kubernetes/mgmt/{{ printf "{{identity.entity.aliases.auth_kubernetes_cc7a231a.metadata.service_account_namespace}}" }}/*" {
             capabilities = ["read", "list"]
           }
     auth:
