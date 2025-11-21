@@ -1,0 +1,18 @@
+apiVersion: v2
+type: application
+name: vault-secrets-webhook
+version: &version 1.21.4
+appVersion: &appVersion v1.21.4
+home: https://bank-vaults.dev
+sources:
+  - https://github.com/hashicorp/vault
+  - https://github.com/bank-vaults/vault-secrets-webhook
+maintainers:
+  - name: Bank Vaults Maintainers
+    email: team@bank-vaults.dev
+
+dependencies:
+  - name: vault-secrets-webhook
+    version: *version
+    repository: oci://ghcr.io/bank-vaults/helm-charts
+    alias: vswh
