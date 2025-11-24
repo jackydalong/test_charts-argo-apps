@@ -1,0 +1,14 @@
+# This file contains the variables that you can change easily.
+# You can override these when running 'helm install'.
+
+image:
+  repository: nginx        # Change this to your own image name (e.g., my-docker-id/my-app)
+  tag: "latest"            # The version of the image
+  pullPolicy: IfNotPresent # Download image only if not found locally
+
+service:
+  type: NodePort           # Exposes the port on each node's IP
+  port: 80                 # The port the service exposes
+  targetPort: 80           # The port your container is listening on
+
+replicaCount: 2            # How many pods (copies) you want running
