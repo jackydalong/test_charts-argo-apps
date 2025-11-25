@@ -1,14 +1,62 @@
-# This file contains the variables that you can change easily.
-# You can override these when running 'helm install'.
+# argoApplicationAnnotations:
+#   argocd-image-updater.argoproj.io/image-list: app=965232795465.dkr.ecr.cn-northwest-1.amazonaws.com.cn/my-app:master
+#   argocd-image-updater.argoproj.io/app.helm.image-name: my-app.image.repository
+#   argocd-image-updater.argoproj.io/app.helm.image-tag: my-app.image.tag
+#   argocd-image-updater.argoproj.io/app.update-strategy: digest
+#   argocd-image-updater.argoproj.io/app.platforms: linux/amd64,linux/arm64
+#   argocd-image-updater.argoproj.io/write-back-method: git
+my-app:
+  replicaCount: 2
+  fullnameOverride: my-app
+  nameOverride: my-app
+  namespaceOverride: my-app
+  image:
+    repository: nginx
+    tag: "latest"
 
-image:
-  repository: nginx        # Change this to your own image name (e.g., my-docker-id/my-app)
-  tag: "latest"            # The version of the image
-  pullPolicy: IfNotPresent # Download image only if not found locally
+  podLabels:
+    vault-injection: enabled
+    logging: enabled
+  podAnnotations:
+    # vault
+    vault.security.banzaicloud.io/vault-addr: https://vault-cn.vault.svc.cluster.local:8200
+    vault.security.banzaicloud.io/vault-path: kubernetes
+    vault.security.banzaicloud.io/vault-role: default
+    vault.security.banzaicloud.io/vault-env-daemon: "true"
+    vault.security.banzaicloud.io/vault-env-from-path: secret/data/kubernetes/mgmt/my-app/env
 
-service:
-  type: NodePort           # Exposes the port on each node's IP
-  port: 80                 # The port the service exposes
-  targetPort: 80           # The port your container is listening on
+  # ingress:
+  #   enabled: true
+  #   className: "alb"
+  #   annotations:
+  #     alb.ingress.kubernetes.io/certificate-arn: >-
+  #       arn:aws-cn:acm:cn-northwest-1:965232795465:certificate/49623da0-1ad9-441b-9305-b6a3f78e5313
+  #     alb.ingress.kubernetes.io/group.name: prod-external
+  #     alb.ingress.kubernetes.io/healthcheck-path: /health
+  #     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+  #     alb.ingress.kubernetes.io/scheme: internet-facing
+  #     alb.ingress.kubernetes.io/ssl-redirect: "443"
+  #     external-dns.alpha.kubernetes.io/hostname: pdf-generator.xometry.asia
+  #   hosts:
+  #   - host: pdf-generator.xometry.asia
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
 
-replicaCount: 2            # How many pods (copies) you want running
+  resources:
+    requests:
+      cpu: 20m
+      memory: 50m
+    limits:
+      cpu: 20m
+      memory: 80m
+      
+  serviceMonitor:
+    enabled: true
+  
+  shared:
+    tmpVolumeSize: 10Mi
+
+  env:
+    - name: my-app-HTTP_PROXY
+      value: http://squid-proxy.mgmt.xometry.asia:3128
