@@ -6,7 +6,7 @@
 #   argocd-image-updater.argoproj.io/app.platforms: linux/amd64,linux/arm64
 #   argocd-image-updater.argoproj.io/write-back-method: git
 my-app:
-  replicaCount: 2
+  replicaCount: 1
   fullnameOverride: my-app
   nameOverride: my-app
   namespaceOverride: my-app
@@ -46,10 +46,10 @@ my-app:
   resources:
     requests:
       cpu: 100m
-      memory: 300m
+      memory: 100Mi
     limits:
       cpu: 100m
-      memory: 500m
+      memory: 200i
       
   serviceMonitor:
     enabled: true
