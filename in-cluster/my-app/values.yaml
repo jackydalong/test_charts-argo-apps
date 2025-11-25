@@ -65,6 +65,10 @@ my-app:
       path: /
       port: http
 
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0    # Optional, but ensures the group is also root
+
   serviceMonitor:
     enabled: true
   
