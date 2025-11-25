@@ -50,7 +50,20 @@ my-app:
     limits:
       cpu: 100m
       memory: 200Mi
-      
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
   serviceMonitor:
     enabled: true
   
