@@ -49,7 +49,7 @@ my-app:
       memory: 50m
     limits:
       cpu: 20m
-      memory: 80m
+      memory: 200m
       
   serviceMonitor:
     enabled: true
