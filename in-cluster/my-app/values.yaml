@@ -24,7 +24,7 @@ my-app:
     vault.security.banzaicloud.io/vault-path: kubernetes
     vault.security.banzaicloud.io/vault-role: default
     vault.security.banzaicloud.io/vault-env-daemon: "true"
-    vault.security.banzaicloud.io/vault-env-from-path: secret/data/kubernetes/mgmt/my-app/env
+    vault.security.banzaicloud.io/vault-env-from-path: secret/kubernetes/mgmt/my-app/env
 
   # ingress:
   #   enabled: true
