@@ -65,9 +65,27 @@ my-app:
       path: /
       port: http
 
+  # default in parent chart
+  # securityContext:
+  #   runAsNonRoot: true
+  #   runAsGroup: 10001
+  #   runAsUser: 10001
+  #   readOnlyRootFilesystem: true
+  #   allowPrivilegeEscalation: false
+  #   seccompProfile:
+  #     type: RuntimeDefault
+  #   capabilities:
+  #     drop:
+  #       - ALL
+
   securityContext:
     runAsUser: 0
-    runAsGroup: 0    # Optional, but ensures the group is also root
+    runAsGroup: 0
+    runAsNonRoot: false  # <--- This is the line you are missing
+    readOnlyRootFilesystem: false # <--- Root usually needs to write to FS
+    # capabilities:
+    #   add: ["NET_BIND_SERVICE"] # Required if you want port 80
+
 
   serviceMonitor:
     enabled: true
