@@ -99,6 +99,9 @@ my-app:
   shared:
     tmpVolumeSize: 10Mi
 
+  serviceAccount:
+    create: false
+
   env:
-    - name: MY_KEY_BAK
-      value: "vault:secret/data/kubernetes/mgmt/my-app/env#MY_KEY"
+    - name: TEST_VAR
+      value: "hello-world"
