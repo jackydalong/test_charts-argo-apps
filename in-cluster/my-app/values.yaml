@@ -24,7 +24,7 @@ my-app:
     vault.security.banzaicloud.io/vault-path: kubernetes
     vault.security.banzaicloud.io/vault-role: default
     vault.security.banzaicloud.io/vault-env-daemon: "true"
-    # vault.security.banzaicloud.io/vault-env-from-path: secret/data/kubernetes/mgmt/my-app/env
+    vault.security.banzaicloud.io/vault-env-from-path: secret/data/kubernetes/mgmt/my-app/env
 
   # ingress:
   #   enabled: true
@@ -100,12 +100,5 @@ my-app:
     tmpVolumeSize: 10Mi
 
   env:
-    # -----------------------------------------------------------------------------------
-    # THE FIX: Use '>>' to enable Templates.
-    # 1. .Secrets "..." -> Fetches the raw JSON from the API path
-    # 2. | get "data"   -> Enters the first layer (KV v2 wrapper)
-    # 3. | get "data"   -> Enters the second layer (The actual secret payload)
-    # 4. | get "MY_KEY" -> Grabs your specific value
-    # -----------------------------------------------------------------------------------
-    - name: MY_KEY
-      value: '>>{{ .Secrets "secret/data/kubernetes/mgmt/my-app/env" | get "data" | get "data" | get "MY_KEY" }}'
+    - name: MY_KEY_BAK
+      value: "vault:secret/data/kubernetes/mgmt/my-app/env#MY_KEY"

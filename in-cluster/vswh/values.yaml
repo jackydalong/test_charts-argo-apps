@@ -7,7 +7,7 @@ vswh:
   env:
     ENABLE_JSON_LOG: "true"
     LOG_LEVEL: debug
-    VAULT_IMAGE: hashicorp/vault:1.14
+    VAULT_IMAGE: hashicorp/vault:1.18
     VAULT_LOG_LEVEL: debug
   certificate:
     useCertManager: true
