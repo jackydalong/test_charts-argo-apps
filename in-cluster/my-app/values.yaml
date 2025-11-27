@@ -101,4 +101,4 @@ my-app:
 
   env:
     - name: MY_KEYY
-      value: "vault:secret/data/kubernetes/mgmt/my-app/env#{ .data.data.MY_KEY }"
+      value: "vault:secret/data/kubernetes/mgmt/my-app/env#MY_KEY"
