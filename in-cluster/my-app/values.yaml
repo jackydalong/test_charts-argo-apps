@@ -102,5 +102,5 @@ my-app:
   env:
     - name: HTTP_PROXY
       value: http://squid-proxy.mgmt.xometry.asia:3128
-    - name: MY_KEY
+    - name: MY_KEYY
       value: "vault:secret/data/kubernetes/mgmt/my-app/env#MY_KEY"
