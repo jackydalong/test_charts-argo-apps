@@ -100,5 +100,12 @@ my-app:
     tmpVolumeSize: 10Mi
 
   env:
-    - name: MY_KEYY
-      value: "vault:secret/data/kubernetes/mgmt/my-app/env#MY_KEY"
+    # -----------------------------------------------------------------------------------
+    # THE FIX: Use '>>' to enable Templates.
+    # 1. .Secrets "..." -> Fetches the raw JSON from the API path
+    # 2. | get "data"   -> Enters the first layer (KV v2 wrapper)
+    # 3. | get "data"   -> Enters the second layer (The actual secret payload)
+    # 4. | get "MY_KEY" -> Grabs your specific value
+    # -----------------------------------------------------------------------------------
+    - name: MY_KEY
+      value: '>>{{ .Secrets "secret/data/kubernetes/mgmt/my-app/env" | get "data" | get "data" | get "MY_KEY" }}'
