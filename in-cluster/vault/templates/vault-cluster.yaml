@@ -350,12 +350,12 @@ spec:
           path "secret/data/kubernetes/mgmt/{{ printf "{{identity.entity.aliases.auth_kubernetes_cc7a231a.metadata.service_account_namespace}}" }}/*" {
             capabilities = ["read", "list"]
           }
-          path "sys/internal/ui/mounts/*" {
-            capabilities = ["read"]
-          }
-          path "sys/mounts" {
-            capabilities = ["read"]
-          }
+          # path "sys/internal/ui/mounts/*" {
+          #   capabilities = ["read"]
+          # }
+          # path "sys/mounts" {
+          #   capabilities = ["read"]
+          # }
     auth:
       # creating roles that target the default kubernetes auth mount 
       # (or an existing mount at auth/kubernetes/) — 
