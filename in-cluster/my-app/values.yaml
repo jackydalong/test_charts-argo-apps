@@ -100,5 +100,7 @@ my-app:
     tmpVolumeSize: 10Mi
 
   env:
-    - name: my-app-HTTP_PROXY
+    - name: HTTP_PROXY
       value: http://squid-proxy.mgmt.xometry.asia:3128
+    - name: MY_KEY
+      value: "vault:secret/data/kubernetes/mgmt/my-app/env#MY_KEY"
